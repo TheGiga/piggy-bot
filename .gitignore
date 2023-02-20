@@ -1,0 +1,8 @@
+*.db
+.env
+venv/
+**__pycache__
+bot.db
+bot.db-journal
+.idea/*
+.idea

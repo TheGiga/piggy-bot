@@ -1,0 +1,4 @@
+COGS = [
+    'basic',
+    'pigs'
+]
