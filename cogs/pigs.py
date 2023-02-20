@@ -4,6 +4,7 @@ from typing import Any
 
 import discord
 from discord.ext.commands import cooldown, BucketType
+from tortoise.exceptions import IntegrityError
 from tortoise.queryset import QuerySet
 
 import config
@@ -73,8 +74,12 @@ class Pigs(discord.Cog):
         if pig.name == name:
             return await ctx.respond('🤨 Вы уже дали такое-же имя своему хряку.', ephemeral=True)
 
+        try:
+            await pig.set_name(name)
+        except IntegrityError:
+            return await ctx.respond(f'Имя {name} уже занято 😢', ephemeral=True)
+
         await ctx.respond(f"☑ Вы успешно сменили имя своего хряка с `{pig.name}` на `{name}`", ephemeral=True)
-        await pig.set_name(name)
 
     @cooldown(1, 5, BucketType.user)
     @discord.slash_command(name='top', description='🐷 Топ хряков по жировой массе')
