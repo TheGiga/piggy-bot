@@ -1,7 +1,12 @@
 import calendar
 import datetime
+import logging
+import os
+from logging import WARNING, ERROR, CRITICAL
 
+import aiohttp
 import discord
+from discord import CheckFailure, Webhook
 from discord.ext.commands import MissingPermissions, CommandOnCooldown
 
 import config
@@ -104,8 +109,36 @@ class Piggy(discord.Bot, ABC):
                 ephemeral=True
             )
 
+        elif isinstance(error, CheckFailure):
+            embed = discord.Embed(colour=discord.Colour.red(), title='⚠ Заборонено!')
+            embed.description = f"❌ Помилка перевірки!"
+            await ctx.respond(embed=embed, ephemeral=True)
+            return
+
         else:
             raise error
+
+    @staticmethod
+    async def send_critical_log(message: str, level: WARNING | ERROR | CRITICAL) -> None:
+        """
+        Message will be forwarded to local logging module + filesystem
+        and also sent out via discord webhook if needed.
+
+        :param level: level of log
+        :param message: The message to be logged
+        :return: None
+        """
+
+        logging.log(
+            level=level,
+            msg=message
+        )
+
+        content = f'`[{logging.getLevelName(level)}]` {message}'
+
+        async with aiohttp.ClientSession() as session:
+            webhook = Webhook.from_url(os.getenv("LOGGING_WEBHOOK"), session=session)
+            await webhook.send(content=content)
 
     async def on_ready(self):
         tprint("XPRKO6OT")

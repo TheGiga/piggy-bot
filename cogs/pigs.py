@@ -1,4 +1,4 @@
-import datetime
+import logging
 import random
 from typing import Any
 
@@ -6,6 +6,7 @@ import discord
 from discord.ext.commands import cooldown, BucketType
 from tortoise.queryset import QuerySet
 
+import config
 from src import Piggy, User, Pig, DefaultEmbed
 
 
@@ -93,6 +94,29 @@ class Pigs(discord.Cog):
         embed.description = leaderboard
 
         await ctx.respond(embed=embed)
+
+    @cooldown(1, 60, BucketType.user)
+    @discord.slash_command(name='report', description='🐖 Пожаловаться на владельца хряка')
+    async def report(
+            self, ctx: discord.ApplicationContext,
+            name: discord.Option(str, description="Имя хряка (уч. регистр)", max_length=30),
+            reason: discord.Option(str, choices=config.REPORT_REASONS)
+    ):
+        pig = await Pig.get_by_name(name)
+
+        if pig is None:
+            return await ctx.respond('😢 Хряк с таким именем - не найден.', ephemeral=True)
+
+        await ctx.defer(ephemeral=True)
+
+        pig_owner = await pig.get_owner()
+
+        await self.bot.send_critical_log(
+            f'Репорт от пользователя `{ctx.user}` на хряка `{pig.name}`, хозяин: `{pig_owner} ({pig_owner.id})`'
+            f'\n- Причина: `{reason}` ||<@352062534469156864>||', logging.CRITICAL
+        )
+
+        await ctx.respond("☑ Репорт успешно отправлен, спасибо.", ephemeral=True)
 
 
 def setup(bot):
