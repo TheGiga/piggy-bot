@@ -70,6 +70,7 @@ class Pigs(discord.Cog):
     async def name(self, ctx: discord.ApplicationContext, name: discord.Option(str, 'желаемое имя', max_length=20)):
         user, _ = await User.get_or_create(discord_id=ctx.user.id)
         pig = await user.get_pig()
+        old_name = pig.name
 
         if pig.name == name:
             return await ctx.respond('🤨 Вы уже дали такое-же имя своему хряку.', ephemeral=True)
@@ -79,7 +80,7 @@ class Pigs(discord.Cog):
         except IntegrityError:
             return await ctx.respond(f'Имя `{name}` уже занято 😢', ephemeral=True)
 
-        await ctx.respond(f"☑ Вы успешно сменили имя своего хряка с `{pig.name}` на `{name}`", ephemeral=True)
+        await ctx.respond(f"☑ Вы успешно сменили имя своего хряка с `{old_name}` на `{name}`", ephemeral=True)
 
     @cooldown(1, 5, BucketType.user)
     @discord.slash_command(name='top', description='🐷 Топ хряков по жировой массе')
