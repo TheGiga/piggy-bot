@@ -14,9 +14,6 @@ from abc import ABC
 from art import tprint
 
 _intents = discord.Intents.default()
-_intents.__setattr__("presences", True)
-_intents.__setattr__("message_content", True)
-_intents.__setattr__("members", True)
 
 
 class Piggy(discord.Bot, ABC):
