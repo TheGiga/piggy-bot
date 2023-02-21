@@ -39,7 +39,7 @@ class Pigs(discord.Cog):
 
         embed.set_thumbnail(url='https://i.imgur.com/EnJ65WL.png')
         embed.add_field(name='🐷 Вес', value=f'{pig.weight} кг.')
-        embed.add_field(name='⏲ Возраст', value=f'{pig.age.days} дней')
+        embed.add_field(name='⏲ Возраст', value=f'{pig.age.days} дн.')
 
         await ctx.respond(embed=embed)
 
@@ -61,7 +61,7 @@ class Pigs(discord.Cog):
                             f'{""}'
 
         embed.add_field(name='🐷 Вес', value=f'{pig.weight} кг.')
-        embed.add_field(name='⏲ Возраст', value=f'{pig.age.days} дней')
+        embed.add_field(name='⏲ Возраст', value=f'{pig.age.days} дн.')
 
         await ctx.respond(embed=embed)
 
@@ -77,7 +77,7 @@ class Pigs(discord.Cog):
         try:
             await pig.set_name(name)
         except IntegrityError:
-            return await ctx.respond(f'Имя {name} уже занято 😢', ephemeral=True)
+            return await ctx.respond(f'Имя `{name}` уже занято 😢', ephemeral=True)
 
         await ctx.respond(f"☑ Вы успешно сменили имя своего хряка с `{pig.name}` на `{name}`", ephemeral=True)
 
