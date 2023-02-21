@@ -68,7 +68,7 @@ class Pigs(discord.Cog):
     @discord.slash_command(name='name', description='🐷 Изменить имя своего хряка')
     @cooldown(1, 30, BucketType.user)
     async def name(self, ctx: discord.ApplicationContext, name: discord.Option(str, 'желаемое имя', max_length=20)):
-        user, _ = await User.get_or_create(discord_id=ctx.user.id)
+        user, created = await User.get_or_create(discord_id=ctx.user.id)
         pig = await user.get_pig()
         old_name = pig.name
 
@@ -80,6 +80,9 @@ class Pigs(discord.Cog):
         except IntegrityError:
             return await ctx.respond(f'Имя `{name}` уже занято 😢', ephemeral=True)
 
+        if created:
+            return await ctx.respond(f"✅ Вы успешно создали хряка с именем `{name}`", ephemeral=True)
+
         await ctx.respond(f"☑ Вы успешно сменили имя своего хряка с `{old_name}` на `{name}`", ephemeral=True)
 
     @cooldown(1, 5, BucketType.user)
@@ -89,11 +92,13 @@ class Pigs(discord.Cog):
 
         query_set: list[Pig, Any] = await QuerySet(Pig).order_by('-weight').limit(10)
 
-        leaderboard = ""
+        leaderboard_content = ""
 
         for i, pig in enumerate(query_set, 1):
             discord_user = await pig.get_owner()
-            leaderboard += f"{i}. {pig.name} - `{pig.weight} кг` || {discord_user} ||\n"
+            leaderboard_content += f"{i}. {pig.name} - {pig.weight} кг.\n- # {discord_user}\n"
+
+        leaderboard = f"```glsl\n{leaderboard_content}```"
 
         embed = DefaultEmbed()
         embed.title = "🐷 Топ 10 хряков"
