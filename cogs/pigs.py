@@ -24,8 +24,6 @@ class Pigs(discord.Cog):
     ):
         author, _ = await User.get_or_create(discord_id=ctx.user.id)
 
-        embed = DefaultEmbed()
-
         if name is None:
             pig = await author.get_pig()
         else:
@@ -34,12 +32,7 @@ class Pigs(discord.Cog):
             if pig is None:
                 return await ctx.respond('😢 Хряк с таким именем - не найден.', ephemeral=True)
 
-        embed.title = pig.name
-        embed.description = f'Хозяин хряка: *`{await pig.get_owner()}`*'
-
-        embed.set_thumbnail(url='https://i.imgur.com/EnJ65WL.png')
-        embed.add_field(name='🐷 Вес', value=f'{pig.weight} кг.')
-        embed.add_field(name='⏲ Возраст', value=f'{pig.age.days} дн.')
+        embed = await pig.get_embed()
 
         await ctx.respond(embed=embed)
 

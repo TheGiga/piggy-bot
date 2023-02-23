@@ -1,5 +1,3 @@
-from typing import Union
-
 from .pig import Pig
 from tortoise import fields
 from tortoise.models import Model
