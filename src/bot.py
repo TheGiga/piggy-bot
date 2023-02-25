@@ -99,12 +99,17 @@ class Piggy(discord.Bot, ABC):
 
             retry_at = datetime.datetime.utcnow() + \
                               datetime.timedelta(seconds=error.cooldown.get_retry_after())
-
-            return await ctx.respond(
-                content=f'❌ На эту команду действует кулдаун, попробуйте еще раз '
-                        f'<t:{calendar.timegm(retry_at.timetuple())}:R>',
-                ephemeral=True
-            )
+            try:
+                return await ctx.respond(
+                    content=f'❌ На эту команду действует кулдаун, попробуйте еще раз '
+                            f'<t:{calendar.timegm(retry_at.timetuple())}:R>',
+                    ephemeral=True
+                )
+            except discord.NotFound:
+                await ctx.send(
+                    f"{ctx.user.mention}, На эту команду действует кулдаун, попробуйте еще раз "
+                    f'<t:{calendar.timegm(retry_at.timetuple())}:R>'
+                )
 
         elif isinstance(error, CheckFailure):
             embed = discord.Embed(colour=discord.Colour.red(), title='⚠ Заборонено!')
