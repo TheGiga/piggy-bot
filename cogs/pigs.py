@@ -37,24 +37,29 @@ class Pigs(discord.Cog):
         await ctx.respond(embed=embed)
 
     @discord.slash_command(name='feed', description='🐷 Покормить своего хряка')
-    @cooldown(1, 10800, BucketType.user)
+    #@cooldown(1, 10800, BucketType.user)
     async def feed(self, ctx: discord.ApplicationContext):
         await ctx.defer()
 
         user, _ = await User.get_or_create(discord_id=ctx.user.id)
         pig = await user.get_pig()
 
-        fat = random.randint(3, 15)
+        fat = random.randint(-6, 15)
 
         await pig.add_weight(fat)
 
         embed = DefaultEmbed()
         embed.title = pig.name
-        embed.description = f'Ваш хряк пожирнел на **{fat} кг**!\n\n' \
-                            f'{""}'
 
         embed.add_field(name='🐷 Вес', value=f'{pig.weight} кг.')
         embed.add_field(name='⏲ Возраст', value=f'{pig.age.days} дн.')
+
+        if fat < 0:
+            embed.description = f'Ваш хряк отравился и похудел на **{abs(fat)} кг** 😢'
+        elif fat > 0:
+            embed.description = f'Ваш хряк пожирнел на **{fat} кг**!\n\n'
+        else:
+            embed.description = "Масса вашего хряка не изменилась... 🐷"
 
         await ctx.respond(embed=embed)
 
