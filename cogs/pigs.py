@@ -37,7 +37,7 @@ class Pigs(discord.Cog):
         await ctx.respond(embed=embed)
 
     @discord.slash_command(name='feed', description='🐷 Покормить своего хряка')
-    #@cooldown(1, 10800, BucketType.user)
+    @cooldown(1, 10800, BucketType.user)
     async def feed(self, ctx: discord.ApplicationContext):
         await ctx.defer()
 
