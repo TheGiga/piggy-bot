@@ -117,6 +117,9 @@ class Piggy(discord.Bot, ABC):
             await ctx.respond(embed=embed, ephemeral=True)
             return
 
+        elif isinstance(error, discord.NotFound):
+            print(f"❌ 'discord.NotFound' exception. Text:\n\n {error.text}")
+
         else:
             raise error
 

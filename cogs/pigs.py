@@ -44,7 +44,7 @@ class Pigs(discord.Cog):
         user, _ = await User.get_or_create(discord_id=ctx.user.id)
         pig = await user.get_pig()
 
-        fat = random.randint(-6, 15)
+        fat = random.randint(-9, 18)
 
         await pig.add_weight(fat)
 
@@ -53,11 +53,12 @@ class Pigs(discord.Cog):
 
         embed.add_field(name='🐷 Вес', value=f'{pig.weight} кг.')
         embed.add_field(name='⏲ Возраст', value=f'{pig.age.days} дн.')
+        embed.set_thumbnail(url='https://i.imgur.com/N45Jkdo.png')
 
         if fat < 0:
             embed.description = f'Ваш хряк отравился и похудел на **{abs(fat)} кг** 😢'
         elif fat > 0:
-            embed.description = f'Ваш хряк пожирнел на **{fat} кг**!\n\n'
+            embed.description = f'Ваш хряк пожирнел на **{fat} кг**!'
         else:
             embed.description = "Масса вашего хряка не изменилась... 🐷"
 

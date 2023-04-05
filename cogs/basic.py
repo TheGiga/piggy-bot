@@ -31,7 +31,7 @@ class Basic(discord.Cog):
         embed.add_field(name='🐷 Имя хряка', value=f'`{pig.name}`', inline=False)
         embed.add_field(name='🔢 UID', value=f'`{local_user.id}`', inline=False)
 
-        embed.set_thumbnail(url=user.display_avatar)
+        embed.set_thumbnail(url=user.display_avatar.url)
 
         async def callback(interaction: discord.Interaction):
             await interaction.response.send_message(embed=await pig.get_embed(), ephemeral=True)
