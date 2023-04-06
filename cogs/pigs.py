@@ -42,7 +42,7 @@ class Pigs(discord.Cog):
     async def feed(self, ctx: discord.ApplicationContext):
         try:
             await ctx.defer()
-        except discord.HTTPException:
+        except discord.NotFound:
             print(f'Cannot defer in /feed, like always... (by {ctx.user}, at: {datetime.datetime.utcnow()} UTC)')
             pass
 
@@ -69,7 +69,7 @@ class Pigs(discord.Cog):
 
         try:
             await ctx.respond(embed=embed)
-        except discord.HTTPException:
+        except discord.NotFound:
             await ctx.send(content=f"{ctx.user.mention}", embed=embed)
 
     @discord.slash_command(name='name', description='🐷 Изменить имя своего хряка')
