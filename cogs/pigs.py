@@ -1,3 +1,4 @@
+import datetime
 import logging
 import random
 from typing import Any
@@ -39,7 +40,11 @@ class Pigs(discord.Cog):
     @discord.slash_command(name='feed', description='🐷 Покормить своего хряка')
     @cooldown(1, 10800, BucketType.user)
     async def feed(self, ctx: discord.ApplicationContext):
-        await ctx.defer()
+        try:
+            await ctx.defer()
+        except discord.HTTPException:
+            print(f'Cannot defer in /feed, like always... (by {ctx.user}, at: {datetime.datetime.utcnow()} UTC)')
+            pass
 
         user, _ = await User.get_or_create(discord_id=ctx.user.id)
         pig = await user.get_pig()
@@ -62,7 +67,10 @@ class Pigs(discord.Cog):
         else:
             embed.description = "Масса вашего хряка не изменилась... 🐷"
 
-        await ctx.respond(embed=embed)
+        try:
+            await ctx.respond(embed=embed)
+        except discord.HTTPException:
+            await ctx.send(content=f"{ctx.user.mention}", embed=embed)
 
     @discord.slash_command(name='name', description='🐷 Изменить имя своего хряка')
     @cooldown(1, 30, BucketType.user)
