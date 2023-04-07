@@ -89,8 +89,13 @@ class Pigs(discord.Cog):
 
         if created:
             return await ctx.respond(f"✅ Вы успешно создали хряка с именем `{name}`", ephemeral=True)
+        try:
+            await ctx.respond(f"☑ Вы успешно сменили имя своего хряка с `{old_name}` на `{name}`", ephemeral=True)
+        except discord.NotFound:
+            await ctx.send(
+                content=f"☑ {ctx.user.mention}, Вы успешно сменили имя своего хряка с `{old_name}` на `{name}`"
+            )
 
-        await ctx.respond(f"☑ Вы успешно сменили имя своего хряка с `{old_name}` на `{name}`", ephemeral=True)
 
     @cooldown(1, 5, BucketType.user)
     @discord.slash_command(name='top', description='🐷 Топ хряков по жировой массе')
