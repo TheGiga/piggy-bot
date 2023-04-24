@@ -49,7 +49,7 @@ class Pigs(discord.Cog):
         user, _ = await User.get_or_create(discord_id=ctx.user.id)
         pig = await user.get_pig()
 
-        fat = random.randint(-9, 18)
+        fat = random.randint(-20, 25)
 
         await pig.add_weight(fat)
 
