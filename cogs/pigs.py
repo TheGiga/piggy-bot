@@ -125,13 +125,20 @@ class Pigs(discord.Cog):
         user, _ = await User.get_or_create(discord_id=ctx.user.id)
         pig = await user.get_pig()
 
-        fat = random.randint(-20, 30)
-
-        if fat < pig.weight:
-            fat = -pig.weight
-            await pig.add_weight(-pig.weight)
+        if 0 <= pig.weight <= 50:
+            fat = random.randint(0, 30)
         else:
-            await pig.add_weight(fat)
+            fat = random.randint(-20, 30)
+
+        old_weight = pig.weight
+
+        await pig.add_weight(fat)
+
+        if pig.weight < 0:
+            pig.weight = 0
+            await pig.save()
+
+            fat = -old_weight
 
         embed = DefaultEmbed()
         embed.title = pig.name
