@@ -108,7 +108,7 @@ class Pigs(discord.Cog):
             "-": {
                 "ru": 'Ваш хряк похудел на **{} кг** 😢',
                 "uk": 'Ваш хряк скинув салової маси на **{} кг** 😢',
-                "en_US": 'You pig lost **{} kg** in weight 😢'
+                "en_US": 'Your pig lost **{} kg** in weight 😢'
             },
             "+": {
                 "ru": 'Ваш хряк пожирнел на **{} кг** 😎',
@@ -125,9 +125,13 @@ class Pigs(discord.Cog):
         user, _ = await User.get_or_create(discord_id=ctx.user.id)
         pig = await user.get_pig()
 
-        fat = random.randint(-20, 25)
+        fat = random.randint(-20, 30)
 
-        await pig.add_weight(fat)
+        if fat < pig.weight:
+            fat = -pig.weight
+            await pig.add_weight(-pig.weight)
+        else:
+            await pig.add_weight(fat)
 
         embed = DefaultEmbed()
         embed.title = pig.name
