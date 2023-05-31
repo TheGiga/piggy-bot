@@ -1,5 +1,4 @@
 import datetime
-import random
 from typing import Any
 
 import discord
@@ -17,13 +16,13 @@ class Pig(Model):
     owner_id = fields.IntField(unique=True)
 
     weight = fields.IntField(default=0)
-    name = fields.CharField(unique=True, max_length=30)
+    name = fields.CharField(unique=True, max_length=32)
     creation_date = fields.DatetimeField()
 
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
         self.creation_date = datetime.datetime.utcnow()
-        self.name = f'Безымянный хряк №{random.randint(100_000, 999_999)}'
+        self.name = f'{self.creation_date.strftime("%Y-%m-%d %H:%M:%S %f")}'
 
     def __int__(self):
         return self.id
@@ -45,15 +44,17 @@ class Pig(Model):
     async def get_owner(self) -> discord.User:
         return await bot_instance.fetch_user(self.owner_id)
 
-    async def get_embed(self) -> discord.Embed:
+    async def get_embed(self, locale = "en_US") -> discord.Embed:
+        from cogs.pigs import trw
+
         embed = DefaultEmbed()
 
         embed.title = self.name
-        embed.description = f'Хозяин хряка: *`{await self.get_owner()}`*'
+        embed.description = f'OWNER: *`{await self.get_owner()}`*'
 
         embed.set_thumbnail(url='https://i.imgur.com/EnJ65WL.png')
-        embed.add_field(name='🐷 Вес', value=f'{self.weight} кг.')
-        embed.add_field(name='⏲ Возраст', value=f'{self.age.days} дн.')
+        embed.add_field(name=f"🐷 {trw('weight', locale)}", value=f'{self.weight} kg.')
+        embed.add_field(name=f"🕐 {trw('age', locale)}", value=f"{self.age.days} {trw('days', locale)}")
 
         return embed
 

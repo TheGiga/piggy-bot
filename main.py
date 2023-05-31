@@ -10,7 +10,6 @@ load_dotenv()
 from src import bot_instance
 from src import db_init
 
-
 async def main():
     await db_init()
     await bot_instance.start(os.getenv("TOKEN"))

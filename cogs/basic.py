@@ -2,6 +2,7 @@ import discord
 from discord.ext.commands import cooldown, BucketType
 
 from src import Piggy, DefaultEmbed, User
+from .pigs import trw
 
 
 class Basic(discord.Cog):
@@ -13,12 +14,21 @@ class Basic(discord.Cog):
         await ctx.respond(embeds=self.bot.help_command())
 
     @cooldown(1, 5, BucketType.user)
-    @discord.slash_command(name='user', description='👤 Информация о пользователе')
+    @discord.slash_command(
+        name='user',
+        description='👤 Information about user',
+        description_localizations={
+            "ru": "👤 Информация о пользователе",
+            "uk": "👤 Інформація про користувача",
+        }
+    )
     async def user(
             self, ctx: discord.ApplicationContext, user: discord.Option(
                 discord.Member, description='пользователь'
             ) = None
     ):
+        locale = ctx.interaction.locale
+
         if user is None:
             user = ctx.user
 
@@ -28,16 +38,16 @@ class Basic(discord.Cog):
         embed = DefaultEmbed()
         embed.title = str(user)
 
-        embed.add_field(name='🐷 Имя хряка', value=f'`{pig.name}`', inline=False)
+        embed.add_field(name=f'🐷 {trw("name", locale)}', value=f'`{pig.name}`', inline=False)
         embed.add_field(name='🔢 UID', value=f'`{local_user.id}`', inline=False)
 
         embed.set_thumbnail(url=user.display_avatar.url)
 
         async def callback(interaction: discord.Interaction):
-            await interaction.response.send_message(embed=await pig.get_embed(), ephemeral=True)
+            await interaction.response.send_message(embed=await pig.get_embed(interaction.locale), ephemeral=True)
 
         view = discord.ui.View()
-        button = discord.ui.Button(label='ㅤㅤИнформация о хрякеㅤㅤ', emoji='🐷')
+        button = discord.ui.Button(label='ㅤㅤㅤㅤ INFO ㅤㅤㅤㅤㅤㅤ', emoji='🐷')
         button.callback = callback
         view.add_item(button)
 

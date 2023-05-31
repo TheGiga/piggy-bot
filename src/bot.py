@@ -90,8 +90,9 @@ class Piggy(discord.Bot, ABC):
             self, ctx: discord.ApplicationContext, error: discord.ApplicationCommandError
     ):
         if isinstance(error, MissingPermissions):
-            embed = discord.Embed(colour=discord.Colour.red(), title='⚠ Заборонено!')
-            embed.description = f"❌ Вам не дозволено виконання цієї команди!"
+            embed = discord.Embed(colour=discord.Colour.red(), title='⚠ RESTRICTED!')
+            embed.description = f"❌ You are not allowed to use this command!" \
+                                f"❌ Вам запрещено использовать эту команду!"
             await ctx.respond(embed=embed, ephemeral=True)
             return
 
@@ -101,19 +102,19 @@ class Piggy(discord.Bot, ABC):
                               datetime.timedelta(seconds=error.cooldown.get_retry_after())
             try:
                 return await ctx.respond(
-                    content=f'❌ На эту команду действует кулдаун, попробуйте еще раз '
+                    content=f'❌ This command is on cooldown, try again '
                             f'<t:{calendar.timegm(retry_at.timetuple())}:R>',
                     ephemeral=True
                 )
             except discord.NotFound:
                 await ctx.send(
-                    f"{ctx.user.mention}, На эту команду действует кулдаун, попробуйте еще раз "
+                    f"{ctx.user.mention}, cooldown, try again "
                     f'<t:{calendar.timegm(retry_at.timetuple())}:R>'
                 )
 
         elif isinstance(error, CheckFailure):
-            embed = discord.Embed(colour=discord.Colour.red(), title='⚠ Заборонено!')
-            embed.description = f"❌ Помилка перевірки!"
+            embed = discord.Embed(colour=discord.Colour.red())
+            embed.description = f"❌ Check failure!"
             await ctx.respond(embed=embed, ephemeral=True)
             return
 
@@ -148,6 +149,7 @@ class Piggy(discord.Bot, ABC):
     async def on_ready(self):
         tprint("XPRKO6OT")
         print(f"✔ Bot is ready, logged in as {self.user}")
+
 
 
 bot_instance = Piggy(intents=_intents)

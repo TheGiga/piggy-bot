@@ -7,6 +7,6 @@ COGS = [
 ADMINS = [352062534469156864]
 
 REPORT_REASONS = [
-    'Имя хряка нарушает https://discord.com/terms либо содержит другую, недопустимую речь',
-    'Хозяин хряка использует читы/баги для получения преимущества'
+    'TOS https://discord.com/terms violation | Нарушение Discord ToS',
+    'Unfair advantages | Использование багов'
 ]
