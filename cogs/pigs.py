@@ -27,7 +27,7 @@ words = {
     "days": {
         "ru": "дн.",
         "uk": "дн.",
-        "en_US": "days"
+        "en_US": "d."
     },
 
     "name": {
