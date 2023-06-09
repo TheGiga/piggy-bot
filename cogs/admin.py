@@ -41,7 +41,7 @@ class Admin(discord.Cog):
     @tasks.loop(minutes=10)
     async def activity_updater(self):
         await self.bot.wait_until_ready()
-        await self.bot.change_presence(activity=discord.Game(name=f'{self.bot.member_count} members.'))
+        await self.bot.change_presence(activity=discord.Game(name=f'{self.bot.member_count} users'))
 
 
 def setup(bot):
