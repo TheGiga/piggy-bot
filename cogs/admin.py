@@ -1,13 +1,17 @@
+import random
+
 import discord
+from discord.ext import tasks
 from tortoise.exceptions import IntegrityError
 
 import config
-from src import Pig
+from src import Pig, Piggy
 
 
 class Admin(discord.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Piggy = bot
+        self.activity_updater.start()
 
     def cog_check(self, ctx: discord.ApplicationContext):
         return ctx.author.id in config.ADMINS
@@ -33,6 +37,11 @@ class Admin(discord.Cog):
             return await ctx.respond(f'Имя {new_name} уже занято 😢', ephemeral=True)
 
         await ctx.respond(f'Имя хряка `ID: {pig.id}` успешно изменено с `{old_name}` на `{pig.name}`.', ephemeral=True)
+
+    @tasks.loop(minutes=10)
+    async def activity_updater(self):
+        await self.bot.wait_until_ready()
+        await self.bot.change_presence(activity=discord.Game(name=f'{self.bot.member_count} members.'))
 
 
 def setup(bot):

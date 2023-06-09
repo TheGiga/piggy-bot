@@ -22,6 +22,15 @@ class Piggy(discord.Bot, ABC):
 
         self.config = config
 
+    @property
+    def member_count(self) -> int:
+        count = 0
+
+        for guild in self.guilds:
+            count += guild.member_count
+
+        return count
+
     def help_command(self) -> list[discord.Embed]:
         embed = discord.Embed()
         embed.colour = discord.Colour.embed_background()
