@@ -8,7 +8,7 @@ class Basic(discord.Cog):
     def __init__(self, bot):
         self.bot: Piggy = bot
 
-    @discord.slash_command(name='help', description='Помощь по боту.')
+    @discord.slash_command(name='help', description='Help me please!')
     async def help_command(self, ctx: PiggyContext):
         await ctx.respond(embeds=self.bot.help_command())
 

@@ -64,7 +64,7 @@ class Piggy(discord.Bot, ABC):
     def help_command(self) -> list[discord.Embed]:
         embed = discord.Embed()
         embed.colour = discord.Colour.embed_background()
-        embed.title = "Команды Хрякобота"
+        embed.title = "PIGBOT Commands"
         embed.set_image(url="https://i.imgur.com/WozcNGD.png")
 
         raw_commands = self.commands.copy()
@@ -82,7 +82,7 @@ class Piggy(discord.Bot, ABC):
             ordinary_commands += f'{slash.mention} » {slash.description}\n'
             raw_commands.remove(slash)
 
-        embed.description = f'**Базовые:** ({slash_count})\n{ordinary_commands}'
+        embed.description = f'**Slash Commands:** ({slash_count})\n{ordinary_commands}'
 
         group_embeds = []
 
