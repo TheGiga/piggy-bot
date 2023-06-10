@@ -1,12 +1,14 @@
 import calendar
 import datetime
+
+from loc import en_US, ru, uk
 import logging
 import os
 from logging import WARNING, ERROR, CRITICAL
 
 import aiohttp
 import discord
-from discord import CheckFailure, Webhook
+from discord import CheckFailure, Webhook, Interaction
 from discord.ext.commands import MissingPermissions, CommandOnCooldown
 
 import config
@@ -15,12 +17,40 @@ from art import tprint
 
 _intents = discord.Intents.default()
 
+class PiggyContext(discord.ApplicationContext):
+    def __init__(self, bot: 'Piggy', interaction: Interaction):
+        super().__init__(bot, interaction)
+
+    @property
+    def translations(self):
+        """
+        :return: Interaction loc strings
+        """
+        locale = self.interaction.locale
+
+        match locale:
+            case "en_US":
+                return en_US
+            case "ru":
+                return ru
+            case "uk":
+                return uk
+
+            case _:
+                return en_US
+
 
 class Piggy(discord.Bot, ABC):
     def __init__(self, *args, **options):
         super().__init__(*args, **options)
 
         self.config = config
+
+    async def get_application_context(
+            self, interaction: discord.Interaction, cls=PiggyContext
+    ):
+        # The same method for custom application context.
+        return await super().get_application_context(interaction, cls=cls)
 
     @property
     def member_count(self) -> int:

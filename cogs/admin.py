@@ -3,7 +3,7 @@ from discord.ext import tasks
 from tortoise.exceptions import IntegrityError
 
 import config
-from src import Pig, Piggy
+from src import Pig, Piggy, PiggyContext
 
 
 class Admin(discord.Cog):
@@ -11,7 +11,7 @@ class Admin(discord.Cog):
         self.bot: Piggy = bot
         self.activity_updater.start()
 
-    def cog_check(self, ctx: discord.ApplicationContext):
+    def cog_check(self, ctx: PiggyContext):
         return ctx.author.id in config.ADMINS
 
     admin = discord.SlashCommandGroup(name='admin', description='Административные команды')
@@ -19,7 +19,7 @@ class Admin(discord.Cog):
 
     @set.command(name='name', description='Изменить имя любого хряка')
     async def set_name(
-            self, ctx: discord.ApplicationContext,
+            self, ctx: PiggyContext,
             name: discord.Option(str, description="Имя хряка (уч. регистр)", max_length=30),
             new_name: discord.Option(str, description='Новое имя', max_length=20)
     ):

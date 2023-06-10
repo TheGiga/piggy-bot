@@ -44,17 +44,15 @@ class Pig(Model):
     async def get_owner(self) -> discord.User:
         return await bot_instance.get_or_fetch_user(self.owner_id)
 
-    async def get_embed(self, locale = "en_US") -> discord.Embed:
-        from cogs.pigs import trw
-
+    async def get_embed(self, translations) -> discord.Embed:
         embed = DefaultEmbed()
 
         embed.title = self.name
         embed.description = f'OWNER: *`{(await self.get_owner()).name}`*'
 
         embed.set_thumbnail(url='https://i.imgur.com/EnJ65WL.png')
-        embed.add_field(name=f"🐷 {trw('weight', locale)}", value=f'{self.weight} kg.')
-        embed.add_field(name=f"🕐 {trw('age', locale)}", value=f"{self.age.days} {trw('days', locale)}")
+        embed.add_field(name=f"🐷 {translations.WEIGHT}", value=f'{self.weight} {translations.KG}')
+        embed.add_field(name=f"🕐 {translations.AGE}", value=f"{self.age.days} {translations.DAYS}")
 
         return embed
 

@@ -9,42 +9,8 @@ from tortoise.exceptions import IntegrityError
 from tortoise.queryset import QuerySet
 
 import config
-from src import Piggy, User, Pig, DefaultEmbed
-
-words = {
-    "weight": {
-        "ru": "Вес",
-        "uk": "Вага",
-        "en_US": "Weight"
-    },
-
-    "age": {
-        "ru": "Возраст",
-        "uk": "Вік",
-        "en_US": "Age"
-    },
-
-    "days": {
-        "ru": "дн.",
-        "uk": "дн.",
-        "en_US": "d."
-    },
-
-    "name": {
-        "ru": "Имя",
-        "uk": "Ім'я",
-        "en_US": "Name"
-    }
-}
-
-def trw(word, locale, default='en_US'):
-    x = words[word].get(locale)
-
-    return x if x else words[word].get(default)
-
-def tr(responses, locale, default = "en_US"):
-    x = responses.get(locale)
-    return x if x else responses.get(default)
+import loc
+from src import Piggy, User, Pig, DefaultEmbed, PiggyContext
 
 class Pigs(discord.Cog):
     def __init__(self, bot):
@@ -52,27 +18,19 @@ class Pigs(discord.Cog):
 
     @discord.slash_command(
         name='pig',
-        description='🐷 Information about specific pig',
+        description=loc.en_US.PIG_CMD_DESCRIPTION,
         description_localizations={
-            "ru": "🐷 Информация о хряке",
-            "uk": "🐷 Інформація про хряка"
+            "ru": loc.ru.PIG_CMD_DESCRIPTION,
+            "uk": loc.uk.PIG_CMD_DESCRIPTION
         }
     )
     @cooldown(1, 5, BucketType.user)
     async def pig(
-            self, ctx: discord.ApplicationContext, name: discord.Option(
+            self, ctx: PiggyContext, name: discord.Option(
                 str, description="name (case sensitive) | имя (уч. регистр)", required=False
             ) = None
     ):
         author, _ = await User.get_or_create(discord_id=ctx.user.id)
-
-        locale = ctx.interaction.locale
-
-        not_found = {
-            "ru": "😢 Хряк с таким именем - не найден.",
-            "uk": "😢 Хряк з таким іменем - не знайдений.",
-            "en_US": "😢 Pig with such name is not found."
-        }
 
         if name is None:
             pig = await author.get_pig()
@@ -80,47 +38,27 @@ class Pigs(discord.Cog):
             pig = await Pig.get_by_name(name)
 
             if pig is None:
-                return await ctx.respond(tr(not_found, locale), ephemeral=True)
+                return await ctx.respond(ctx.translations.NAME_NOT_FOUND, ephemeral=True)
 
-        embed = await pig.get_embed(ctx.interaction.locale)
+        embed = await pig.get_embed(ctx.translations)
 
         await ctx.respond(embed=embed)
 
     @discord.slash_command(
         name='feed',
-        description='🐷 Feed your pig',
+        description=loc.en_US.FEED_CMD_DESCRIPTION,
         description_localizations={
-            "ru": "🐷 Покормить своего хряка",
-            "uk": "🐷 Покормити свого хряка"
+            "ru": loc.ru.FEED_CMD_DESCRIPTION,
+            "uk": loc.uk.FEED_CMD_DESCRIPTION
         }
     )
     @cooldown(1, 10800, BucketType.user)
-    async def feed(self, ctx: discord.ApplicationContext):
+    async def feed(self, ctx: PiggyContext):
         try:
             await ctx.defer()
         except discord.NotFound:
             print(f'Cannot defer in /feed, like always... (by {ctx.user}, at: {datetime.datetime.utcnow()} UTC)')
             pass
-
-        locale = ctx.interaction.locale
-
-        responses = {
-            "-": {
-                "ru": 'Ваш хряк похудел на **{} кг** 😢',
-                "uk": 'Ваш хряк скинув салової маси на **{} кг** 😢',
-                "en_US": 'Your pig lost **{} kg** in weight 😢'
-            },
-            "+": {
-                "ru": 'Ваш хряк пожирнел на **{} кг** 😎',
-                "uk": 'Ваш хряк нагнав салової маси на **{} кг** 😎',
-                "en_US": 'Your pig gained **{} kg** in weight 😎'
-            },
-            "=": {
-                "ru": 'Масса вашего хряка не изменилась... 🐷',
-                "uk": 'Маса вашого хряка не змінилася... 🐷',
-                "en_US": "Weight of your pig didn't change... 🐷"
-            },
-        }
 
         user, _ = await User.get_or_create(discord_id=ctx.user.id)
         pig = await user.get_pig()
@@ -143,16 +81,16 @@ class Pigs(discord.Cog):
         embed = DefaultEmbed()
         embed.title = pig.name
 
-        embed.add_field(name=f"🐷 {trw('weight', locale)}", value=f'{pig.weight} kg.')
-        embed.add_field(name=f"🕐 {trw('age', locale)}", value=f"{pig.age.days} {trw('days', locale)}")
+        embed.add_field(name=f"🐷 {ctx.translations.WEIGHT}", value=f'{pig.weight} {ctx.translations.KG}')
+        embed.add_field(name=f"🕐 {ctx.translations.AGE}", value=f"{pig.age.days} {ctx.translations.DAYS}")
         embed.set_thumbnail(url='https://i.imgur.com/N45Jkdo.png')
 
         if fat < 0:
-            embed.description = tr(responses["-"], locale).format(abs(fat))
+            embed.description = ctx.translations.WEIGHT_CHANGE_MINUS.format(abs(fat))
         elif fat > 0:
-            embed.description = tr(responses["+"], locale).format(fat)
+            embed.description = ctx.translations.WEIGHT_CHANGE_PLUS.format(fat)
         else:
-            embed.description = tr(responses["="], locale)
+            embed.description = ctx.translations.WEIGHT_CHANGE_SAME
 
         try:
             await ctx.respond(embed=embed)
@@ -161,75 +99,45 @@ class Pigs(discord.Cog):
 
     @discord.slash_command(
         name='name',
-        description="🐷 Change Pig's name",
+        description=loc.en_US.NAME_CMD_DESCRIPTION,
         description_localizations={
-            "ru": "🐷 Изменить имя своего хряка",
-            "uk": "🐷 Змінити ім'я свого хряка"
+            "ru": loc.ru.NAME_CMD_DESCRIPTION,
+            "uk": loc.uk.NAME_CMD_DESCRIPTION
         }
     )
     @cooldown(1, 30, BucketType.user)
-    async def name(self, ctx: discord.ApplicationContext, name: discord.Option(str, "PIG'S NAME", max_length=20)):
-        locale = ctx.interaction.locale
-
-        responses = {
-            "same_name": {
-                "ru": "🤨 Вы уже дали такое-же имя своему хряку.",
-                "uk": "🤨 Ви вже дали таке саме ім'я свому хряку.",
-                "en_US": "🤨 You've already set the same name for your pig."
-            },
-            "already_exists": {
-                "ru": "Имя `{}` уже занято 😢",
-                "uk": "Ім'я `{}` вже зайняте 😢",
-                "en_US": "The name `{}` is already taken 😢"
-            },
-            "created": {
-                "ru": "✅ Вы успешно создали хряка с именем `{}`",
-                "uk": "✅ Ви успішно створили хряка з іменем `{}`",
-                "en_US": "✅ You have successfully created a pig with name `{}`"
-            },
-            "changed": {
-                "ru": "☑️ Вы успешно сменили имя своего хряка с `{old}` на `{new}`.",
-                "uk": "☑️ Ви успішно змінили ім'я свого хряка з `{old}` на `{new}`.",
-                "en_US": "☑️ You have successfully changed your pig's name from `{old}` to `{new}`."
-            }
-        }
-
+    async def name(self, ctx: PiggyContext, name: discord.Option(str, "PIG'S NAME", max_length=20)):
         user, created = await User.get_or_create(discord_id=ctx.user.id)
         pig = await user.get_pig()
         old_name = pig.name
 
         if pig.name == name:
-            return await ctx.respond(tr(responses["same_name"], locale), ephemeral=True)
+            return await ctx.respond(ctx.translations.SAME_NAME, ephemeral=True)
 
         try:
             await pig.set_name(name)
         except IntegrityError:
-            return await ctx.respond(tr(responses["already_exists"], locale).format(name), ephemeral=True)
+            return await ctx.respond(ctx.translations.NAME_ALREADY_EXISTS.format(name), ephemeral=True)
 
         if created:
-            return await ctx.respond(tr(responses["created"], locale).format(name), ephemeral=True)
+            return await ctx.respond(ctx.translations.PIG_CREATED.format(name), ephemeral=True)
 
-        try:
-            await ctx.respond(
-                tr(responses["changed"], locale).format(old=old_name, new=name),
-                ephemeral=True
-            )
-        except discord.NotFound:
-            await ctx.send(
-                tr(responses["changed"], locale).format(old=old_name, new=name)
-            )
+        await ctx.respond(
+            ctx.translations.NAME_CHANGED.format(old_name, name),
+            ephemeral=True
+        )
 
 
     @cooldown(1, 5, BucketType.user)
     @discord.slash_command(
         name='top',
-        description='🐷 Top 10 pigs by weight',
+        description=loc.en_US.TOP_CMD_DESCRIPTION,
         description_localizations={
-            "ru": "🐷 Топ хряков по жировой массе",
-            "uk": "🐷 Топ 10 хряків за саловим запасом"
+            "ru": loc.ru.TOP_CMD_DESCRIPTION,
+            "uk": loc.uk.TOP_CMD_DESCRIPTION
         }
     )
-    async def top(self, ctx: discord.ApplicationContext):
+    async def top(self, ctx: PiggyContext):
         await ctx.defer()
 
         query_set: list[Pig, Any] = await QuerySet(Pig).order_by('-weight').limit(10)
@@ -238,12 +146,12 @@ class Pigs(discord.Cog):
 
         for i, pig in enumerate(query_set, 1):
             discord_user = await pig.get_owner()
-            leaderboard_content += f"{i}. {pig.name} - {pig.weight} kg.\n- # {discord_user}\n"
+            leaderboard_content += f"{i}. {pig.name} - {pig.weight} {ctx.translations.KG}.\n- # {discord_user.name}\n"
 
         leaderboard = f"```glsl\n{leaderboard_content}```"
 
         embed = DefaultEmbed()
-        embed.title = "🐷 TOP 10"
+        embed.title = ctx.translations.TOP_10
         embed.description = leaderboard
 
         await ctx.respond(embed=embed)
@@ -251,50 +159,34 @@ class Pigs(discord.Cog):
     @cooldown(1, 60, BucketType.user)
     @discord.slash_command(
         name='report',
-        description='🐖 Report user',
+        description=loc.en_US.REPORT_CMD_DESCRIPTION,
         description_localizations={
-            "ru": "🐖 Жалоба на владельца хряка",
-            "uk": "🐖 Скарга на користувача"
+            "ru": loc.ru.REPORT_CMD_DESCRIPTION,
+            "uk": loc.uk.REPORT_CMD_DESCRIPTION
         }
     )
     async def report(
-            self, ctx: discord.ApplicationContext,
+            self, ctx: PiggyContext,
             name: discord.Option(str, description="Имя хряка (уч. регистр)", max_length=30),
             reason: discord.Option(str, choices=config.REPORT_REASONS)
     ):
         await ctx.defer(ephemeral=True)
 
-        locale = ctx.interaction.locale
-
-        responses = {
-            "not_found": {
-                "ru": "😢 Хряк с таким именем - не найден.",
-                "uk": "😢 Хряк з таким іменем - не знайдений.",
-                "en_US": "😢 Pig with such name is not found."
-            },
-
-            "success": {
-                "ru": "☑️ Репорт успешно отправлен, спасибо!",
-                "uk": "☑️ Репорт успішно відправлено, дякуємо!",
-                "en_US": "☑️ Thanks for the report!"
-            }
-        }
-
         pig = await Pig.get_by_name(name)
 
         if pig is None:
-            return await ctx.respond(tr(responses["not_found"], locale), ephemeral=True)
+            return await ctx.respond(ctx.translations.NAME_NOT_FOUND, ephemeral=True)
 
         await ctx.defer(ephemeral=True)
 
         pig_owner = await pig.get_owner()
 
         await self.bot.send_critical_log(
-            f'Репорт от пользователя `{ctx.user}` на хряка `{pig.name}`, хозяин: `{pig_owner} ({pig_owner.id})`'
-            f'\n- Причина: `{reason}` ||<@352062534469156864>||', logging.CRITICAL
+            f'Report from `{ctx.user}` on pig `{pig.name}`, owner: `{pig_owner} ({pig_owner.id})`'
+            f'\n- Reason: `{reason}` ||<@352062534469156864>||', logging.CRITICAL
         )
 
-        await ctx.respond(tr(responses["success"], locale), ephemeral=True)
+        await ctx.respond(ctx.translations.REPORT_SUCCESS, ephemeral=True)
 
 
 def setup(bot):
