@@ -47,7 +47,7 @@ class Basic(discord.Cog):
             await interaction.response.send_message(embed=await pig.get_embed(interaction.locale), ephemeral=True)
 
         view = discord.ui.View()
-        button = discord.ui.Button(label='ㅤㅤㅤㅤ INFO ㅤㅤㅤㅤㅤㅤ', emoji='🐷')
+        button = discord.ui.Button(label='PIG INFO', emoji='🐷')
         button.callback = callback
         view.add_item(button)
 
