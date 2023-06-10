@@ -1,5 +1,3 @@
-import random
-
 import discord
 from discord.ext import tasks
 from tortoise.exceptions import IntegrityError

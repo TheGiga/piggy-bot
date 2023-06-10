@@ -36,7 +36,7 @@ class Basic(discord.Cog):
         pig = await local_user.get_pig()
 
         embed = DefaultEmbed()
-        embed.title = str(user)
+        embed.title = user.name
 
         embed.add_field(name=f'🐷 {trw("name", locale)}', value=f'`{pig.name}`', inline=False)
         embed.add_field(name='🔢 UID', value=f'`{local_user.id}`', inline=False)
