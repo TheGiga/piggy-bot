@@ -1,6 +1,8 @@
-# Бот с хряками.
-Выращивай своего хряка и стань самым крутым владельцем хряка на планете.
+# The PIGBOT
+This is source code of PIGBOT#3809 by me.
 
-Добавить -> https://canary.discord.com/api/oauth2/authorize?client_id=1075068110714970112&permissions=274878228544&scope=applications.commands%20bot
+You can add it using following link -> https://canary.discord.com/api/oauth2/authorize?client_id=1075068110714970112&permissions=274878228544&scope=applications.commands%20bot
 
-![зображення](https://user-images.githubusercontent.com/49173264/220483514-b3d2a4f0-09d2-4933-a89f-0dd56620eb1c.png)
+![зображення](https://github.com/TheGiga/piggy-bot/assets/49173264/58d1f1a1-ea92-418a-9c06-f73b44460ed0)
+
+![зображення](https://github.com/TheGiga/piggy-bot/assets/49173264/15a40fe9-2de4-4e13-99ab-17c809cc0852)
