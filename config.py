@@ -7,6 +7,6 @@ COGS = [
 ADMINS = [352062534469156864]
 
 REPORT_REASONS = [
-    'TOS https://discord.com/terms violation | Нарушение Discord ToS',
+    'ToS violation | Нарушение Discord ToS ( https://discord.com/terms )',
     'Unfair advantages | Использование багов'
 ]

@@ -167,7 +167,7 @@ class Pigs(discord.Cog):
     )
     async def report(
             self, ctx: PiggyContext,
-            name: discord.Option(str, description="Имя хряка (уч. регистр)", max_length=30),
+            name: discord.Option(str, description="name of the pig (case sensitive)", max_length=30),
             reason: discord.Option(str, choices=config.REPORT_REASONS)
     ):
         await ctx.defer(ephemeral=True)
