@@ -22,15 +22,30 @@ class Basic(discord.Cog):
         }
     )
     async def user(
-            self, ctx: PiggyContext, user: discord.Option(
-                discord.Member, description='пользователь'
+            self, ctx: PiggyContext,
+            user: discord.Option(
+                discord.Member, description='пользователь / user'
+            ) = None,
+            uid: discord.Option(
+                int, description='либо его UID / or his UID'
             ) = None
     ):
-        if user is None:
+        if not user and not uid:
             user = ctx.user
 
-        local_user, _ = await User.get_or_create(discord_id=user.id)
-        pig = await local_user.get_pig()
+        if uid and not user:
+            print(uid)
+            local_user = await User.get_or_none(id=uid)
+
+            if not local_user:
+                return await ctx.respond(f":x: UID `{uid}` not found!", ephemeral=True)
+
+            user = await ctx.bot.get_or_fetch_user(local_user.discord_id)
+
+            pig = await local_user.get_pig()
+        else:
+            local_user, _ = await User.get_or_create(discord_id=user.id)
+            pig = await local_user.get_pig()
 
         embed = DefaultEmbed()
         embed.title = user.name
