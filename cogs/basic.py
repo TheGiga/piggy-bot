@@ -34,7 +34,6 @@ class Basic(discord.Cog):
             user = ctx.user
 
         if uid and not user:
-            print(uid)
             local_user = await User.get_or_none(id=uid)
 
             if not local_user:
