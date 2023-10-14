@@ -12,6 +12,7 @@ import config
 import loc
 from src import Piggy, User, Pig, DefaultEmbed, PiggyContext
 
+
 class Pigs(discord.Cog):
     def __init__(self, bot):
         self.bot: Piggy = bot
@@ -127,7 +128,6 @@ class Pigs(discord.Cog):
             ephemeral=True
         )
 
-
     @cooldown(1, 5, BucketType.user)
     @discord.slash_command(
         name='top',
@@ -168,7 +168,7 @@ class Pigs(discord.Cog):
     async def report(
             self, ctx: PiggyContext,
             name: discord.Option(str, description="name of the pig (case sensitive)", max_length=30),
-            reason: discord.Option(str, choices=config.REPORT_REASONS)
+            reason: discord.Option(str, description="reason of the report (f.e: ToS violation)")
     ):
         await ctx.defer(ephemeral=True)
 
