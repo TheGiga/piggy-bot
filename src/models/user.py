@@ -9,6 +9,7 @@ class User(Model):
     id = fields.IntField(pk=True)
     discord_id = fields.IntField()
     pig_id = fields.IntField(default=0)
+    last_interaction = fields.DatetimeField(auto_now_add=True)
 
     def __int__(self):
         return self.discord_id

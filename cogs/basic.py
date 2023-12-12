@@ -10,9 +10,11 @@ class Basic(discord.Cog):
 
     @discord.slash_command(name='help', description='Help me please!')
     async def help_command(self, ctx: PiggyContext):
-        await ctx.respond(embeds=self.bot.help_command())
+        await ctx.respond(
+            content=ctx.translations.HELP_CMD_DATA_RETENTION_INFO,
+            embeds=self.bot.help_command()
+        )
 
-    @cooldown(1, 5, BucketType.user)
     @discord.slash_command(
         name='user',
         description=loc.en_US.USER_CMD_DESCRIPTION,
@@ -21,6 +23,7 @@ class Basic(discord.Cog):
             "uk": loc.uk.USER_CMD_DESCRIPTION,
         }
     )
+    @cooldown(1, 5, BucketType.user)
     async def user(
             self, ctx: PiggyContext,
             user: discord.Option(

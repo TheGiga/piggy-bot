@@ -8,7 +8,6 @@ from discord.ext.commands import cooldown, BucketType
 from tortoise.exceptions import IntegrityError
 from tortoise.queryset import QuerySet
 
-import config
 import loc
 from src import Piggy, User, Pig, DefaultEmbed, PiggyContext
 
@@ -31,7 +30,7 @@ class Pigs(discord.Cog):
                 str, description="name (case sensitive) | имя (уч. регистр)", required=False
             ) = None
     ):
-        author, _ = await User.get_or_create(discord_id=ctx.user.id)
+        author, created = await User.get_or_create(discord_id=ctx.user.id)
 
         if name is None:
             pig = await author.get_pig()
@@ -43,7 +42,7 @@ class Pigs(discord.Cog):
 
         embed = await pig.get_embed(ctx.translations)
 
-        await ctx.respond(embed=embed)
+        await ctx.respond(embed=embed, content=ctx.translations.CHANGE_NAME_PROPOSAL if created else "")
 
     @discord.slash_command(
         name='feed',
@@ -61,7 +60,7 @@ class Pigs(discord.Cog):
             print(f'Cannot defer in /feed, like always... (by {ctx.user}, at: {datetime.datetime.utcnow()} UTC)')
             pass
 
-        user, _ = await User.get_or_create(discord_id=ctx.user.id)
+        user, created = await User.get_or_create(discord_id=ctx.user.id)
         pig = await user.get_pig()
 
         if 0 <= pig.weight <= 50:
@@ -94,7 +93,7 @@ class Pigs(discord.Cog):
             embed.description = ctx.translations.WEIGHT_CHANGE_SAME
 
         try:
-            await ctx.respond(embed=embed)
+            await ctx.respond(embed=embed, content=ctx.translations.CHANGE_NAME_PROPOSAL if created else "")
         except discord.NotFound:
             await ctx.send(content=f"{ctx.user.mention}", embed=embed)
 
@@ -176,8 +175,6 @@ class Pigs(discord.Cog):
 
         if pig is None:
             return await ctx.respond(ctx.translations.NAME_NOT_FOUND, ephemeral=True)
-
-        await ctx.defer(ephemeral=True)
 
         pig_owner = await pig.get_owner()
 
