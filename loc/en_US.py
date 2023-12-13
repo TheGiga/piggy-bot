@@ -11,8 +11,8 @@ DATA_DELETION_CMD_DESCRIPTION = "DELETE ALL data associated with YOUR account (Y
 HELP_CMD_DATA_RETENTION_INFO = \
     (
         f"ℹ️ NOTE: If you haven't used any bot commands in "
-        f"**{config.DATA_RETENTION_PERIOD_DAYS} days** your data and all the progress will be ** globally purged**!\n\n"
-        f"To request data deletion whenever you like, use `/delete_my_data` command."
+        f"**{config.DATA_RETENTION_PERIOD_DAYS} days** you will receive \"inactive status\" and will lose your UID!\n\n"
+        f"To request OVERALL data deletion whenever you like, use `/delete_my_data` command."
     )
 
 NAME = "Name"
