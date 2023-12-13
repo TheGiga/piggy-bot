@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 import discord
 from discord.ext import tasks
@@ -68,8 +69,6 @@ class Data(discord.Cog):
         if view.value:
             local_user = await User.get_or_none(discord_id=ctx.user.id)
 
-            print(local_user)
-
             if not local_user:
                 return await response.edit(
                     embed=discord.Embed(
@@ -78,10 +77,16 @@ class Data(discord.Cog):
                     )
                 )
 
-            pig = await local_user.get_pig()
+            pigs = await local_user.get_all_pigs()
 
             await local_user.delete()
-            await pig.delete()
+
+            for pig in pigs:
+                await pig.delete()
+
+            await self.bot.send_critical_log(
+                f"Deleted data for {local_user} due to request. Pigs: \n```{pigs}```", logging.INFO
+            )
 
             await response.edit(
                 embed=discord.Embed(
@@ -90,6 +95,7 @@ class Data(discord.Cog):
                 )
             )
 
+    #@tasks.loop(seconds=15, reconnect=True)
     @tasks.loop(time=datetime.time(hour=3, tzinfo=datetime.timezone.utc), reconnect=True)
     async def inactive_users_purger(self):
         await self.bot.wait_until_ready()
@@ -97,17 +103,27 @@ class Data(discord.Cog):
         checklist = await User.all()
 
         for user in checklist:
+            pigs = await user.get_all_pigs(only_active=True)
+
+            for pig in pigs:
+                pig_last_fed_x_ago = datetime.datetime.utcnow() - pig.last_fed.replace(tzinfo=None)
+
+                if pig_last_fed_x_ago > datetime.timedelta(days=config.DATA_RETENTION_PERIOD_DAYS):
+                    await pig.set_activeness_status(False)
+
             last_active_x_ago = datetime.datetime.utcnow() - user.last_interaction.replace(tzinfo=None)
 
             if last_active_x_ago > datetime.timedelta(days=config.DATA_RETENTION_PERIOD_DAYS):
-                pig = await user.get_pig()
-
                 await user.delete()
-                await pig.delete()
+
+                await self.bot.send_critical_log(
+                    f"Deleted data for {user} due to inactivity. Pigs (retained for preservation):\n"
+                    f"```{pigs}```", logging.INFO
+                )
 
                 print(
                     f"(!) Deleted records for user {user}, "
-                    f"since they were inactive for {config.DATA_RETENTION_PERIOD_DAYS} days."
+                    f"since they were last active {last_active_x_ago} ago..."
                 )
 
 

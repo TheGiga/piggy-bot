@@ -11,7 +11,7 @@ DATA_DELETION_CMD_DESCRIPTION = "DELETE ALL data associated with YOUR account (Y
 HELP_CMD_DATA_RETENTION_INFO = \
     (
         f"ℹ️ NOTE: If you haven't used any bot commands in "
-        f"**{config.DATA_RETENTION_PERIOD_DAYS} days** your data and all the progress will be **purged**!\n\n"
+        f"**{config.DATA_RETENTION_PERIOD_DAYS} days** your data and all the progress will be ** globally purged**!\n\n"
         f"To request data deletion whenever you like, use `/delete_my_data` command."
     )
 
@@ -38,11 +38,19 @@ NAME_CHANGED = "☑️ You have successfully changed your pig's name from `{0}` 
 CHANGE_NAME_PROPOSAL = "ℹ️ Consider changing your pigs name by using `/name <new name>`"
 
 CONFIRMING = "✅ Confirming..."
-CANCELLING = "Cancelling."
+CANCELLING = "❌ Cancelling."
+
+LAST_FED = "🥕 Last Fed"
+STATUS = "⌛ Status"
+STATUS_ACTIVE = "Active"
+STATUS_INACTIVE = "Inactive"
 
 DATA_DELETION_EMBED_TITLE = "Confirm data deletion request!"
 DATA_DELETION_EMBED_DESCRIPTION = \
-    "You are about to delete **ALL** your data. **INCLUDING all the progress**\n\n**THIS PROCESS IS IRREVERSIBLE**"
+    (
+        "You are about to delete **ALL** your data. "
+        "**including ALL THE PROGRESS from ALL SERVERS**\n\n**THIS PROCESS IS IRREVERSIBLE**"
+    )
 DATA_DELETION_NO_ASSOCIATED_DATA = "There is no data associated with your account."
 DATA_DELETION_SUCCESS = "**✅ Success!**\nAll your data was successfully deleted."
 

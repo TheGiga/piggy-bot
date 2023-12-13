@@ -13,11 +13,14 @@ class Pig(Model):
     # Basic
 
     id = fields.IntField(pk=True)
-    owner_id = fields.IntField(unique=True)
+    owner_id = fields.IntField(unique=False)
+    server_id = fields.IntField()
 
     weight = fields.IntField(default=0)
     name = fields.CharField(unique=True, max_length=32)
     creation_date = fields.DatetimeField()
+    last_fed = fields.DatetimeField(auto_now_add=True)
+    active = fields.BooleanField(default=True)
 
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
@@ -31,7 +34,7 @@ class Pig(Model):
         return self.name
 
     def __repr__(self):
-        return f'Pig({self.owner_id=}, {self.id=})'
+        return f'Pig({self.owner_id=}, {self.id=}, {self.weight=}, {self.active=})'
 
     async def add_weight(self, x: int) -> None:
         self.weight += x
@@ -43,6 +46,17 @@ class Pig(Model):
 
     async def get_owner(self) -> discord.User:
         return await bot_instance.get_or_fetch_user(self.owner_id)
+
+    async def set_last_feeding_time(self, time: datetime.datetime = None):
+        if not time:
+            time = datetime.datetime.utcnow()
+
+        self.last_fed = time
+        await self.save()
+
+    async def set_activeness_status(self, status: bool):
+        self.active = status
+        await self.save()
 
     async def get_embed(self, translations) -> discord.Embed:
         embed = DefaultEmbed()

@@ -7,13 +7,29 @@ import config
 
 load_dotenv()
 
-from src import bot_instance
-from src import db_init
+from src import bot_instance, PiggyContext, db_init, User, Pig
 
 
 async def main():
     await db_init()
     await bot_instance.start(os.getenv("TOKEN"))
+
+
+@bot_instance.check
+async def before_invoke_check(ctx: PiggyContext):
+    # TODO: implement black list
+
+    user, created = await User.get_or_create(discord_id=ctx.user.id)
+
+    if not created:
+        await user.update_last_interaction_time()
+    else:
+        pig = await Pig.get_or_none(owner_id=ctx.user.id, server_id=ctx.guild_id)
+
+        if pig:
+            await pig.set_activeness_status(True)
+
+    return True
 
 
 if __name__ == "__main__":

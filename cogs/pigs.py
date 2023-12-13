@@ -1,3 +1,4 @@
+import calendar
 import datetime
 import logging
 import random
@@ -8,6 +9,7 @@ from discord.ext.commands import cooldown, BucketType
 from tortoise.exceptions import IntegrityError
 from tortoise.queryset import QuerySet
 
+import config
 import loc
 from src import Piggy, User, Pig, DefaultEmbed, PiggyContext
 
@@ -33,14 +35,19 @@ class Pigs(discord.Cog):
         author, created = await User.get_or_create(discord_id=ctx.user.id)
 
         if name is None:
-            pig = await author.get_pig()
+            pig = await author.get_pig(ctx.guild_id)
         else:
             pig = await Pig.get_by_name(name)
 
             if pig is None:
                 return await ctx.respond(ctx.translations.NAME_NOT_FOUND, ephemeral=True)
 
+        status = ctx.translations.STATUS_ACTIVE if pig.active else ctx.translations.STATUS_INACTIVE
+
         embed = await pig.get_embed(ctx.translations)
+
+        embed.add_field(name=ctx.translations.STATUS, value=status)
+        embed.add_field(name=ctx.translations.LAST_FED, value=f'<t:{calendar.timegm(pig.last_fed.timetuple())}:R>')
 
         await ctx.respond(embed=embed, content=ctx.translations.CHANGE_NAME_PROPOSAL if created else "")
 
@@ -52,7 +59,7 @@ class Pigs(discord.Cog):
             "uk": loc.uk.FEED_CMD_DESCRIPTION
         }
     )
-    @cooldown(1, 10800, BucketType.user)
+    @cooldown(1, config.FEED_COMMAND_COOLDOWN_SECONDS, BucketType.member)
     async def feed(self, ctx: PiggyContext):
         try:
             await ctx.defer()
@@ -61,10 +68,10 @@ class Pigs(discord.Cog):
             pass
 
         user, created = await User.get_or_create(discord_id=ctx.user.id)
-        pig = await user.get_pig()
+        pig = await user.get_pig(ctx.guild_id)
 
         if 0 <= pig.weight <= 50:
-            fat = random.randint(0, 30)
+            fat = random.randint(1, 30)
         else:
             fat = random.randint(-20, 30)
 
@@ -77,6 +84,10 @@ class Pigs(discord.Cog):
             await pig.save()
 
             fat = -old_weight
+
+        await pig.set_last_feeding_time()
+        if not pig.active:
+            await pig.set_activeness_status(True)
 
         embed = DefaultEmbed()
         embed.title = pig.name
@@ -108,7 +119,7 @@ class Pigs(discord.Cog):
     @cooldown(1, 30, BucketType.user)
     async def name(self, ctx: PiggyContext, name: discord.Option(str, "PIG'S NAME", max_length=20)):
         user, created = await User.get_or_create(discord_id=ctx.user.id)
-        pig = await user.get_pig()
+        pig = await user.get_pig(ctx.guild_id)
         old_name = pig.name
 
         if pig.name == name:
@@ -136,10 +147,15 @@ class Pigs(discord.Cog):
             "uk": loc.uk.TOP_CMD_DESCRIPTION
         }
     )
-    async def top(self, ctx: PiggyContext):
+    async def top(self, ctx: PiggyContext, leaderboard_type: discord.Option(name="type", choices=['local', 'global'])):
         await ctx.defer()
 
-        query_set: list[Pig, Any] = await QuerySet(Pig).order_by('-weight').limit(10)
+        basic_query = QuerySet(Pig).order_by('-weight').filter(active=True).limit(10)
+
+        if leaderboard_type == "local":
+            query_set: list[Pig, Any] = await basic_query.filter(server_id=ctx.guild_id)
+        else:
+            query_set: list[Pig, Any] = await basic_query
 
         leaderboard_content = ""
 
@@ -147,10 +163,10 @@ class Pigs(discord.Cog):
             discord_user = await pig.get_owner()
             leaderboard_content += f"{i}. {pig.name} - {pig.weight} {ctx.translations.KG}.\n- # {discord_user.name}\n"
 
-        leaderboard = f"```glsl\n{leaderboard_content}```"
+        leaderboard = f"```glsl\n{leaderboard_content if leaderboard_content else 'Empty...'}```"
 
         embed = DefaultEmbed()
-        embed.title = ctx.translations.TOP_10
+        embed.title = f"{ctx.translations.TOP_10} | {leaderboard_type.upper()}"
         embed.description = leaderboard
 
         await ctx.respond(embed=embed)

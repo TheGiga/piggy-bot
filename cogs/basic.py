@@ -44,10 +44,10 @@ class Basic(discord.Cog):
 
             user = await ctx.bot.get_or_fetch_user(local_user.discord_id)
 
-            pig = await local_user.get_pig()
+            pig = await local_user.get_pig(ctx.guild_id)
         else:
             local_user, _ = await User.get_or_create(discord_id=user.id)
-            pig = await local_user.get_pig()
+            pig = await local_user.get_pig(ctx.guild_id)
 
         embed = DefaultEmbed()
         embed.title = user.name

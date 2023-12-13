@@ -20,7 +20,7 @@ class Admin(discord.Cog):
     @set.command(name='name', description='Изменить имя любого хряка')
     async def set_name(
             self, ctx: PiggyContext,
-            name: discord.Option(str, description="Имя хряка (уч. регистр)", max_length=30),
+            name: discord.Option(str, description="Имя хряка (уч. регистр)", max_length=32),
             new_name: discord.Option(str, description='Новое имя', max_length=20)
     ):
         pig = await Pig.get_by_name(name)
@@ -35,6 +35,25 @@ class Admin(discord.Cog):
             return await ctx.respond(f'Имя {new_name} уже занято 😢', ephemeral=True)
 
         await ctx.respond(f'Имя хряка `ID: {pig.id}` успешно изменено с `{old_name}` на `{pig.name}`.', ephemeral=True)
+
+    @admin.command(name='announce', description='ANNOUNCE TO ALL SERVERS, should be used extremely rarely.')
+    async def announce_message(self, ctx: PiggyContext, message: str):
+        await ctx.defer()
+
+        successes, errors = 0, 0
+
+        for guild in self.bot.guilds:
+            for channel in guild.text_channels:
+                try:
+                    await channel.send(message)
+                    successes += 1
+
+                    break
+                except discord.DiscordException:
+                    errors += 1
+                    continue
+
+        await ctx.respond(f"{successes=}, {errors=}")
 
     @tasks.loop(minutes=10)
     async def activity_updater(self):
