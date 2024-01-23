@@ -170,10 +170,10 @@ class Pigs(discord.Cog):
 
         basic_query = QuerySet(Pig).order_by('-weight').filter(active=True).limit(10)
 
-        # if leaderboard_type == "local":
-        # query_set: list[Pig, Any] = await basic_query.filter(server_id=ctx.guild_id)
+        # if leaderboard_type == "global":
+        # query_set: list[Pig, Any] = await basic_query
         # else:
-        query_set: list[Pig, Any] = await basic_query
+        query_set: list[Pig, Any] = await basic_query.filter(server_id=ctx.guild_id)
 
         leaderboard_content = ""
 
