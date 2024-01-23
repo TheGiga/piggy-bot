@@ -42,12 +42,7 @@ class Pigs(discord.Cog):
             if pig is None:
                 return await ctx.respond(ctx.translations.NAME_NOT_FOUND, ephemeral=True)
 
-        status = ctx.translations.STATUS_ACTIVE if pig.active else ctx.translations.STATUS_INACTIVE
-
         embed = await pig.get_embed(ctx.translations)
-
-        embed.add_field(name=ctx.translations.STATUS, value=status)
-        embed.add_field(name=ctx.translations.LAST_FED, value=f'<t:{calendar.timegm(pig.last_fed.timetuple())}:R>')
 
         await ctx.respond(embed=embed, content=ctx.translations.CHANGE_NAME_PROPOSAL if created else "")
 

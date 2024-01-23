@@ -1,3 +1,4 @@
+import calendar
 import datetime
 from typing import Any
 
@@ -61,12 +62,16 @@ class Pig(Model):
     async def get_embed(self, translations) -> discord.Embed:
         embed = DefaultEmbed()
 
+        status = translations.STATUS_ACTIVE if self.active else translations.STATUS_INACTIVE
+
         embed.title = self.name
         embed.description = f'OWNER: *`{(await self.get_owner()).name}`*'
 
         embed.set_thumbnail(url='https://i.imgur.com/EnJ65WL.png')
         embed.add_field(name=f"🐷 {translations.WEIGHT}", value=f'{self.weight} {translations.KG}')
         embed.add_field(name=f"🕐 {translations.AGE}", value=f"{self.age.days} {translations.DAYS}")
+        embed.add_field(name=translations.STATUS, value=status)
+        embed.add_field(name=translations.LAST_FED, value=f'<t:{calendar.timegm(self.last_fed.timetuple())}:R>')
 
         return embed
 
