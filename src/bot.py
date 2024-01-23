@@ -130,8 +130,8 @@ class Piggy(discord.Bot, ABC):
             self, ctx: discord.ApplicationContext, error: discord.ApplicationCommandError
     ):
         if isinstance(error, MissingPermissions):
-            embed = discord.Embed(colour=discord.Colour.red(), title='⚠ RESTRICTED!')
-            embed.description = f"❌ You are not allowed to use this command!" \
+            embed = discord.Embed(colour=discord.Colour.red(), title='👤 RESTRICTED!')
+            embed.description = f"**❌ You are not allowed to use this command!**\n" \
                                 f"❌ Вам запрещено использовать эту команду!"
             await ctx.respond(embed=embed, ephemeral=True)
             return

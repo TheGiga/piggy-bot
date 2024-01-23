@@ -55,3 +55,11 @@ DATA_DELETION_NO_ASSOCIATED_DATA = "There is no data associated with your accoun
 DATA_DELETION_SUCCESS = "**✅ Success!**\nAll your data was successfully deleted."
 
 REPORT_SUCCESS = "☑️ Report successfully sent, thanks!"
+
+GUILD_CONFIG_HELP_EMBED_TITLE = "Available Configuration Keys"
+GUILD_CONFIG_HELP_INSTRUCTIONS = ("ℹ️ This is a list of guild-specific config keys that can be used in "
+                                  "`/config value`.\n> Example: `/config value key:cooldown value:10800`")
+GUILD_CONFIG_VALUE_ERROR = "❌ Given value doesn't meet the following requirements: `{}`"
+GUILD_CONFIG_VALUE_SUCCESS = "✅ You successfully changed the value of `{0}` to `{1}`."
+
+COOLDOWN_MESSAGE = "❌ This command is on cooldown, try again {}"

@@ -1,64 +1,69 @@
+import datetime
+
 import discord
-from discord.ext import tasks
-from tortoise.exceptions import IntegrityError
+from discord.ext.commands import has_permissions
 
 import config
-from src import Pig, Piggy, PiggyContext
+from src import Piggy, PiggyContext, DefaultEmbed
+from src.cooldown import PerGuildCooldownManager
+from src.models import Guild
 
 
 class Admin(discord.Cog):
     def __init__(self, bot):
         self.bot: Piggy = bot
-        self.activity_updater.start()
 
-    def cog_check(self, ctx: PiggyContext):
-        return ctx.author.id in config.ADMINS
+    configuration = discord.SlashCommandGroup(name='config', description='Administrative commands and configuration')
 
-    admin = discord.SlashCommandGroup(name='admin', description='Административные команды')
-    set = admin.create_subgroup(name='set')
-
-    @set.command(name='name', description='Изменить имя любого хряка')
-    async def set_name(
+    @has_permissions(administrator=True)
+    @configuration.command(name='value')
+    async def config_value(
             self, ctx: PiggyContext,
-            name: discord.Option(str, description="Имя хряка (уч. регистр)", max_length=32),
-            new_name: discord.Option(str, description='Новое имя', max_length=20)
+            key: discord.Option(str, choices=config.AVAILABLE_CONFIG_OPTIONS),
+            value: discord.Option(str, required=False, default=None, description="leave empty to see the current value")
     ):
-        pig = await Pig.get_by_name(name)
+        if value is None:
+            guild, _ = await Guild.get_or_create(discord_id=ctx.guild_id)
+            value = guild.get_config_option(key)
 
-        if pig is None:
-            return await ctx.respond('😢 Хряк с таким именем - не найден.', ephemeral=True)
+            return await ctx.respond(f"`{key}`: `{value}`", ephemeral=True)
 
-        old_name = pig.name
-        try:
-            await pig.set_name(new_name)
-        except IntegrityError:
-            return await ctx.respond(f'Имя {new_name} уже занято 😢', ephemeral=True)
+        cfg_options = config.AVAILABLE_CONFIG_OPTIONS
+        check = cfg_options[key]["value_check_procedure"]
 
-        await ctx.respond(f'Имя хряка `ID: {pig.id}` успешно изменено с `{old_name}` на `{pig.name}`.', ephemeral=True)
+        if not check(value):
+            return await ctx.respond(
+                content=ctx.translations.GUILD_CONFIG_VALUE_ERROR.format(cfg_options[key]["value_check_requirements"]),
+                ephemeral=True
+            )
 
-    @admin.command(name='announce', description='ANNOUNCE TO ALL SERVERS, should be used extremely rarely.')
-    async def announce_message(self, ctx: PiggyContext, message: str):
-        await ctx.defer()
+        guild, _ = await Guild.get_or_create(discord_id=ctx.guild_id)
+        await guild.assert_config_option(key=key, value=value)
 
-        successes, errors = 0, 0
+        if key == "cooldown":  # TODO: idk, come up with a better solution???
+            cdm = PerGuildCooldownManager.register_or_get(guild=ctx.guild, time=datetime.timedelta(minutes=int(value)))
+            cdm.change_time(time=datetime.timedelta(minutes=int(value)))
 
-        for guild in self.bot.guilds:
-            for channel in guild.text_channels:
-                try:
-                    await channel.send(message)
-                    successes += 1
+        await ctx.respond(ctx.translations.GUILD_CONFIG_VALUE_SUCCESS.format(key, value), ephemeral=True)
 
-                    break
-                except discord.DiscordException:
-                    errors += 1
-                    continue
+    @has_permissions(administrator=True)
+    @configuration.command(name='help')
+    async def config_help(self, ctx: PiggyContext):
+        available_keys = ""
+        cfg_options = config.AVAILABLE_CONFIG_OPTIONS
 
-        await ctx.respond(f"{successes=}, {errors=}")
+        for key in config.AVAILABLE_CONFIG_OPTIONS:
+            available_keys += (
+                f"* **`{key}`**\n"
+                f"> {cfg_options[key]['comment']}\n"
+                f"> Default: `{cfg_options[key]['default_value']}`"
+            )
 
-    @tasks.loop(minutes=10)
-    async def activity_updater(self):
-        await self.bot.wait_until_ready()
-        await self.bot.change_presence(activity=discord.Game(name=f'{self.bot.member_count} users'))
+        embed = DefaultEmbed()
+        embed.title = ctx.translations.GUILD_CONFIG_HELP_EMBED_TITLE
+        embed.description = f'{available_keys}\n\n{ctx.translations.GUILD_CONFIG_HELP_INSTRUCTIONS}'
+
+        await ctx.respond(embed=embed)
 
 
 def setup(bot):

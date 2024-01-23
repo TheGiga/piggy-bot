@@ -55,3 +55,11 @@ DATA_DELETION_NO_ASSOCIATED_DATA = "Данные ассоциированные 
 DATA_DELETION_SUCCESS = "**✅ Успешно!**\nВсе ваши данные были успешно удалены."
 
 REPORT_SUCCESS = "☑️ Репорт успешно отправлен, спасибо!"
+
+GUILD_CONFIG_HELP_EMBED_TITLE = "Доступные значения для настройки"
+GUILD_CONFIG_HELP_INSTRUCTIONS = ("ℹ️ Это список доступных для настройки ключей для использования в "
+                                  "`/config value`.\n> Пример: `/config value key:cooldown value:10800`")
+GUILD_CONFIG_VALUE_ERROR = "❌ Указанное значение не соответствует требованиям: `{}`"
+GUILD_CONFIG_VALUE_SUCCESS = "✅ Вы успешно изменили значения `{0}` на `{1}`."
+
+COOLDOWN_MESSAGE = "❌ Вы сможете использовать эту команду {}"

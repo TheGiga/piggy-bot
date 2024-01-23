@@ -12,6 +12,8 @@ from tortoise.queryset import QuerySet
 import config
 import loc
 from src import Piggy, User, Pig, DefaultEmbed, PiggyContext
+from src.cooldown import PerGuildCooldownManager
+from src.models import Guild
 
 
 class Pigs(discord.Cog):
@@ -54,8 +56,27 @@ class Pigs(discord.Cog):
             "uk": loc.uk.FEED_CMD_DESCRIPTION
         }
     )
-    @cooldown(1, config.FEED_COMMAND_COOLDOWN_SECONDS, BucketType.member)
     async def feed(self, ctx: PiggyContext):
+        local_guild, _ = await Guild.get_or_create(ctx.guild_id)
+        cd = local_guild.config.get('cooldown')
+
+        try:
+            cd = int(cd)
+        except TypeError or ValueError:
+            cd = config.FEED_COMMAND_COOLDOWN_MINUTES
+
+        cooldown_manager = PerGuildCooldownManager.register_or_get(
+            guild=ctx.guild,
+            time=datetime.timedelta(minutes=cd)
+        )
+
+        if cooldown_manager.is_on_cooldown(ctx.user):
+            retry_at = cooldown_manager.retry_at(user=ctx.user)
+            return await ctx.respond(
+                content=ctx.translations.COOLDOWN_MESSAGE.format(f"<t:{calendar.timegm(retry_at.timetuple())}:R>"),
+                ephemeral=True
+            )
+
         try:
             await ctx.defer()
         except discord.NotFound:
@@ -97,6 +118,8 @@ class Pigs(discord.Cog):
             embed.description = ctx.translations.WEIGHT_CHANGE_PLUS.format(fat)
         else:
             embed.description = ctx.translations.WEIGHT_CHANGE_SAME
+
+        cooldown_manager.add_user(ctx.user)
 
         try:
             await ctx.respond(embed=embed, content=ctx.translations.CHANGE_NAME_PROPOSAL if created else "")
