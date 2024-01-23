@@ -57,7 +57,7 @@ class Pigs(discord.Cog):
         }
     )
     async def feed(self, ctx: PiggyContext):
-        local_guild, _ = await Guild.get_or_create(ctx.guild_id)
+        local_guild, _ = await Guild.get_or_create(discord_id=ctx.guild_id)
         cd = local_guild.config.get('cooldown')
 
         try:

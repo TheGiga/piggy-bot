@@ -46,10 +46,7 @@ class PerGuildCooldownManager:
     def register_or_get(cls, guild: discord.Guild, time: datetime.timedelta) -> 'PerGuildCooldownManager':
         existing_record = cooldown_managers.get(guild.id)
 
-        print(f"{existing_record=}")
-
         if not existing_record:
-            print('not existing')
             existing_record = PerGuildCooldownManager(guild, time)
             cooldown_managers[guild.id] = existing_record
 
