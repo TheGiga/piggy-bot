@@ -58,7 +58,7 @@ REPORT_SUCCESS = "☑️ Report successfully sent, thanks!"
 
 GUILD_CONFIG_HELP_EMBED_TITLE = "Available Configuration Keys"
 GUILD_CONFIG_HELP_INSTRUCTIONS = ("ℹ️ This is a list of guild-specific config keys that can be used in "
-                                  "`/config value`.\n> Example: `/config value key:cooldown value:10800`")
+                                  "`/config value`.\n> Example: `/config value key:cooldown value:60`")
 GUILD_CONFIG_VALUE_ERROR = "❌ Given value doesn't meet the following requirements: `{}`"
 GUILD_CONFIG_VALUE_SUCCESS = "✅ You successfully changed the value of `{0}` to `{1}`."
 
