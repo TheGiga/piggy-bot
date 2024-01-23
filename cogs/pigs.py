@@ -164,16 +164,16 @@ class Pigs(discord.Cog):
             "ru": loc.ru.TOP_CMD_DESCRIPTION,
             "uk": loc.uk.TOP_CMD_DESCRIPTION
         }
-    )
-    async def top(self, ctx: PiggyContext, leaderboard_type: discord.Option(name="type", choices=['local', 'global'])):
+    )  # leaderboard_type: discord.Option(name="type", choices=['local', 'global'])):
+    async def top(self, ctx: PiggyContext):
         await ctx.defer()
 
         basic_query = QuerySet(Pig).order_by('-weight').filter(active=True).limit(10)
 
-        if leaderboard_type == "local":
-            query_set: list[Pig, Any] = await basic_query.filter(server_id=ctx.guild_id)
-        else:
-            query_set: list[Pig, Any] = await basic_query
+        # if leaderboard_type == "local":
+        # query_set: list[Pig, Any] = await basic_query.filter(server_id=ctx.guild_id)
+        # else:
+        query_set: list[Pig, Any] = await basic_query
 
         leaderboard_content = ""
 
@@ -184,7 +184,7 @@ class Pigs(discord.Cog):
         leaderboard = f"```glsl\n{leaderboard_content if leaderboard_content else 'Empty...'}```"
 
         embed = DefaultEmbed()
-        embed.title = f"{ctx.translations.TOP_10} | {leaderboard_type.upper()}"
+        embed.title = f"{ctx.translations.TOP_10}"  # | {leaderboard_type.upper()}"
         embed.description = leaderboard
 
         await ctx.respond(embed=embed)
