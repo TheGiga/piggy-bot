@@ -90,7 +90,7 @@ class Piggy(discord.Bot, ABC):
         for group in [
             group
             for group in raw_commands
-            if type(group) is discord.SlashCommandGroup and group.name != 'admin'
+            if type(group) is discord.SlashCommandGroup and group.name not in config.EXCLUDED_HELP_CMD_GROUPS
         ]:
             group_embed = discord.Embed()
             group_embed.colour = discord.Colour.embed_background()
