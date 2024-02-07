@@ -48,7 +48,6 @@ class Pigs(discord.Cog):
 
         await ctx.respond(embed=embed, content=ctx.translations.CHANGE_NAME_PROPOSAL if created else "")
 
-    @cooldown(1, 5, BucketType.user)  # anti-spam cooldown
     @discord.slash_command(
         name='feed',
         description=loc.en_US.FEED_CMD_DESCRIPTION,
@@ -57,6 +56,7 @@ class Pigs(discord.Cog):
             "uk": loc.uk.FEED_CMD_DESCRIPTION
         }
     )
+    @cooldown(1, 5, BucketType.user)  # anti-spam cooldown
     async def feed(self, ctx: PiggyContext):
         local_guild, _ = await Guild.get_or_create(discord_id=ctx.guild_id)
         cd = local_guild.config.get('cooldown')
