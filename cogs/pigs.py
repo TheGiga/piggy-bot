@@ -48,6 +48,7 @@ class Pigs(discord.Cog):
 
         await ctx.respond(embed=embed, content=ctx.translations.CHANGE_NAME_PROPOSAL if created else "")
 
+    @cooldown(1, 5, BucketType.user)  # anti-spam cooldown
     @discord.slash_command(
         name='feed',
         description=loc.en_US.FEED_CMD_DESCRIPTION,
